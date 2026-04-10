@@ -1,4 +1,4 @@
-use crate::alcohol::{AlcoholRequest, AlcoholStatus};
+use crate::alcohol::{AlcoholStatus};
 use crate::packets::Response;
 use crate::state::{SharedState, SocketType};
 use tokio_cron_scheduler::Job;
@@ -54,8 +54,8 @@ pub async fn worker(state: SharedState) {
                                     };
 
                                     match alcohol.tick() {
-                                        AlcoholRequest::None => (),
-                                        AlcoholRequest::Shot { amount } => {
+                                        None => (),
+                                        Option::Some(amount)=> {
                                             let response = Response::PumpUpdate { amount };
                                             tokio::spawn(async move {
                                                 if let Ok(json) = serde_json::to_string(&response) {
