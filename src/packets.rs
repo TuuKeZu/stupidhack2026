@@ -20,6 +20,7 @@ pub enum Packet {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "type")]
 pub enum Response {
     #[serde(rename = "ok")]
     Okay,
