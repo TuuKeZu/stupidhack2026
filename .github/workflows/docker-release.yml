@@ -36,8 +36,8 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/stupidhack-2026:latest
-            ghcr.io/${{ github.repository_owner }}/stupidhack-2026:${{ github.sha }}
+            stupidhack-2026:latest
+            stupidhack-2026:${{ github.sha }}
 
       - name: Set GHCR package visibility to public
         env:
