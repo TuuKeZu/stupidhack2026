@@ -36,8 +36,8 @@ jobs:
           file: Dockerfile
           push: true
           tags: |
-            ghcr.io/${{ github.repository_owner }}/stupidhack-2026:latest
-            ghcr.io/${{ github.repository_owner }}/stupidhack-2026:${{ github.sha }}
+            ghcr.io/${{ github.repository_owner }}/stupidhack2026:latest
+            ghcr.io/${{ github.repository_owner }}/stupidhack2026:${{ github.sha }}
 
       - name: Create GitHub Release for tag
         if: startsWith(github.ref, 'refs/tags/')
@@ -49,5 +49,5 @@ jobs:
           release_name: Release ${{ github.ref }}
           body: |
             Docker images pushed:
-            - ghcr.io/${{ github.repository_owner }}/stupidhack-2026:${{ github.sha }}
-            - ghcr.io/${{ github.repository_owner }}/stupidhack-2026:latest
+            - ghcr.io/${{ github.repository_owner }}/stupidhack2026:${{ github.sha }}
+            - ghcr.io/${{ github.repository_owner }}/stupidhack2026:latest
