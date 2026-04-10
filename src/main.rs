@@ -49,7 +49,7 @@ async fn main() {
     println!("Server running on http://127.0.0.1:3030");
     println!("  - Client endpoint: ws://127.0.0.1:3030/ws/client");
     println!("  - Pump endpoint: ws://127.0.0.1:3030/ws/pump");
-    warp::serve(routes).run(([127, 0, 0, 1], 3030)).await;
+    warp::serve(routes).run(([0, 0, 0, 0], 3030)).await;
 }
 
 async fn handle_socket(ws: WebSocket, state: SharedState, socket_type: SocketType) {
