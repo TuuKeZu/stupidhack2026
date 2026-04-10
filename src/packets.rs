@@ -17,6 +17,9 @@ pub enum Packet {
 
     #[serde(rename = "current")]
     SetCurrent { value: f64 },
+
+    #[serde(rename = "drink")]
+    SetDrink { value: f64 },
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -62,6 +65,13 @@ pub async fn handle_message(
                 .await;
             Response::Okay
         }
+        Packet::SetDrink { value } => {
+            state
+                .alcohol_update(|a|{
+                    a.update_drink(value);
+                }).await;
+            Response::Okay
+        },
     };
 
     if let Ok(json) = serde_json::to_string(&response) {
