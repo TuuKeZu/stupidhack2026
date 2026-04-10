@@ -1,7 +1,7 @@
 # Multi-stage Dockerfile for building and running the Rust warp websocket server
 
 # Builder stage: compile the binary
-FROM rust:1.72 as builder
+FROM rust:latest as builder
 WORKDIR /usr/src/app
 
 # Copy manifests and fetch dependencies to maximize cache usage
