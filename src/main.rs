@@ -1,4 +1,3 @@
-use futures_util::stream::SplitSink;
 use futures_util::StreamExt;
 use tokio::sync::RwLock;
 use warp::filters::ws::Message;
@@ -6,9 +5,8 @@ use warp::ws::{WebSocket, Ws};
 use warp::Filter;
 
 use crate::alcohol::Alcohol;
-use crate::error::Error;
 use crate::packets::{handle_message, Packet};
-use crate::state::{Connection, SharedState, State, SocketType};
+use crate::state::{Connection, SharedState, SocketType, State};
 
 pub mod alcohol;
 pub mod error;
@@ -66,7 +64,9 @@ async fn handle_socket(ws: WebSocket, state: SharedState, socket_type: SocketTyp
                         let _ = handle_message(packet, state, socket_type).await;
                     }
                     Err(err) => {
-                        let _ = state.send_message(socket_type, Message::text(err.to_string())).await;
+                        let _ = state
+                            .send_message(socket_type, Message::text(err.to_string()))
+                            .await;
                     }
                 }
             }

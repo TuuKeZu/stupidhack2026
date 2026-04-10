@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use warp::filters::ws::Message;
 
-use crate::{error::Error, SharedState, state::SocketType};
+use crate::{error::Error, state::SocketType, SharedState};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(tag = "type")]
@@ -36,7 +36,11 @@ pub enum Response {
     PumpUpdate { amount: f64 },
 }
 
-pub async fn handle_message(packet: Packet, state: SharedState, socket_type: SocketType) -> Result<(), Error> {
+pub async fn handle_message(
+    packet: Packet,
+    state: SharedState,
+    socket_type: SocketType,
+) -> Result<(), Error> {
     let response = match packet {
         Packet::Ping { data: _ } => Response::Pong {
             data: "pong".to_string(),

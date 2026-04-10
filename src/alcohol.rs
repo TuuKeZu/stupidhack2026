@@ -6,7 +6,7 @@ const TICKS_TO_HIT: usize = 4;
 // In one hour the human body will remove about 1.5 permille from the body.
 const BURNRATE_H: f64 = 0.00015;
 
-const BURNRATE: f64 = (BURNRATE_H/60.0) * TICK_TIME as f64;
+const BURNRATE: f64 = (BURNRATE_H / 60.0) * TICK_TIME as f64;
 
 /// Time of one tick in minutes
 const TICK_TIME: u32 = 5;
@@ -65,12 +65,16 @@ pub struct Person {
 
 impl Default for Person {
     fn default() -> Self {
-        Self { gender: Default::default(), weight: 80., height: 180. }
+        Self {
+            gender: Default::default(),
+            weight: 80.,
+            height: 180.,
+        }
     }
 }
 
 #[derive(Default, Debug)]
-pub enum Gender{
+pub enum Gender {
     Male,
     Female,
     #[default]
@@ -78,19 +82,18 @@ pub enum Gender{
 }
 
 impl Person {
-
     /// Returns the amount of alcohol needed for a certain raise in BAC
-    pub fn get_amount_needed(&self, delta_bac: &f64)-> f64{
-        let mass: f64 = 10.*delta_bac * self.get_wild_mark_factor()*self.weight;
-        return mass
+    pub fn get_amount_needed(&self, delta_bac: &f64) -> f64 {
+        let mass: f64 = 10. * delta_bac * self.get_wild_mark_factor() * self.weight;
+        return mass;
     }
 
-    pub fn get_promiles(&self, mass_ml: &f64) -> f64{
-        return mass_ml/(10.*(self.get_wild_mark_factor()*self.weight))
+    pub fn get_promiles(&self, mass_ml: &f64) -> f64 {
+        return mass_ml / (10. * (self.get_wild_mark_factor() * self.weight));
     }
 
     // TODO: Make this gender specific
-    pub fn get_wild_mark_factor(&self)->f64{
+    pub fn get_wild_mark_factor(&self) -> f64 {
         0.31608 - 0.004_821 * self.weight + 0.4632 * self.height
     }
 }
@@ -100,7 +103,7 @@ impl Alcohol {
         self.target = target;
     }
 
-    pub fn update_drink(&mut self, new_abv: f64){
+    pub fn update_drink(&mut self, new_abv: f64) {
         self.current_drink_abv = new_abv;
     }
 
@@ -121,14 +124,14 @@ impl Alcohol {
     }
 
     fn update_current(&mut self) {
-        if self.tick >= TICKS_TO_HIT{
-            match self.queue.get(self.tick-TICKS_TO_HIT){
+        if self.tick >= TICKS_TO_HIT {
+            match self.queue.get(self.tick - TICKS_TO_HIT) {
                 Some(x) => self.current += self.person.get_promiles(x),
                 None => (),
             }
         }
 
-        if self.current > 0.{
+        if self.current > 0. {
             self.current -= f64::min(self.current, BURNRATE)
         }
     }
@@ -141,11 +144,11 @@ impl Alcohol {
         }
 
         // "köyhän miehen PID
-        if self.estimate_forward(TICKS_TO_HIT) < self.target{
+        if self.estimate_forward(TICKS_TO_HIT) < self.target {
             let diff: f64 = self.target - self.estimate_forward(TICKS_TO_HIT);
             self.tick += 1;
             let amount = self.calculate_amount(diff);
-            self.queue.push(amount/100. * self.current_drink_abv);
+            self.queue.push(amount / 100. * self.current_drink_abv);
             return Option::Some(amount);
         }
         self.queue.push(0.);
@@ -154,34 +157,34 @@ impl Alcohol {
     }
 
     /// Estimates BAC at in the future at n tics, without any interaction
-    fn estimate_forward(&self, ticks: usize)->f64{
+    fn estimate_forward(&self, ticks: usize) -> f64 {
         let mut current = self.current;
-        for t in self.tick..=self.tick+ticks{
-            if t >= TICKS_TO_HIT{
-                match self.queue.get(t - TICKS_TO_HIT){
+        for t in self.tick..=self.tick + ticks {
+            if t >= TICKS_TO_HIT {
+                match self.queue.get(t - TICKS_TO_HIT) {
                     Some(x) => current += self.person.get_promiles(x),
                     None => (),
                 }
             }
-            if current > 0.{
+            if current > 0. {
                 current -= f64::min(current, BURNRATE)
             }
         }
         current
     }
 
-    fn calculate_amount(&self,diff: f64)-> f64{
+    fn calculate_amount(&self, diff: f64) -> f64 {
         let amount_needed = self.person.get_amount_needed(&diff);
-                let liquid:f64 = amount_needed*100./self.current_drink_abv;
-                let liquid_claped = f64::min(liquid, MAX_LIQUID);
-        let alhocol = liquid_claped * self.current_drink_abv/100.;
-                let alcohol_clamped = f64::min(alhocol, MAX_ALCOHOL);
-                alcohol_clamped/self.current_drink_abv*100.
+        let liquid: f64 = amount_needed * 100. / self.current_drink_abv;
+        let liquid_claped = f64::min(liquid, MAX_LIQUID);
+        let alhocol = liquid_claped * self.current_drink_abv / 100.;
+        let alcohol_clamped = f64::min(alhocol, MAX_ALCOHOL);
+        alcohol_clamped / self.current_drink_abv * 100.
     }
 }
 
 #[cfg(test)]
-pub mod tests{
+pub mod tests {
     use super::Alcohol;
 
     #[test]
@@ -189,9 +192,9 @@ pub mod tests{
         let mut alc: Alcohol = Alcohol::default();
         alc.update_target(0.001);
         alc.update_drink(38.5);
-        for _ in 0..25{
-            println!("{:?}",alc.tick());
-            println!("{:?}",alc.current);
+        for _ in 0..25 {
+            alc.tick();
         }
+        assert!(f64::abs(alc.current-0.001)<=0.0002)
     }
 }
