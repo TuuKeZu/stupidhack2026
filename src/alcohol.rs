@@ -40,7 +40,7 @@ impl Into<bool> for AlcoholStatus {
     }
 }
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone)]
 pub struct Alcohol {
     /// Estimate of the current BAC
     pub current: f64,
@@ -55,6 +55,12 @@ pub struct Alcohol {
     pub liver: f64,
     pub queue: Vec<f64>,
     pub history: Vec<f64>,
+}
+
+impl Default for Alcohol {
+    fn default() -> Self {
+        Self { current: Default::default(), target: Default::default(), status: Default::default(), tick: Default::default(), person: Default::default(), current_drink_abv: 40.0, liver: Default::default(), queue: Default::default(), history: Default::default() }
+    }
 }
 
 #[derive(Debug, Clone)]
@@ -121,9 +127,11 @@ impl Alcohol {
         self.target = 0.;
         self.current = 0.;
         self.tick = 0;
-        self.current_drink_abv = 0.;
+        self.current_drink_abv = 40.;
 
         self.liver = 0.0;
+        self.history.clear();
+        self.queue.clear();
     }
 
     fn update_current(&mut self) {
