@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 use warp::filters::ws::Message;
 
+use crate::alcohol::Alcohol;
 use crate::{error::Error, state::SocketType, SharedState};
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -11,6 +12,9 @@ pub enum Packet {
 
     #[serde(rename = "reset")]
     Reset,
+
+    #[serde(rename = "vomit")]
+    Vomit,
 
     #[serde(rename = "target")]
     SetTarget { value: f64 },
@@ -77,6 +81,21 @@ pub async fn handle_message(
                 })
                 .await;
             Response::Okay
+        }
+        Packet::Vomit  => {
+            state
+                .alcohol_update(|a| {
+                    a.vomit();
+                })
+                .await;
+            let alcohol : Alcohol = state.alcohol.read().await.clone();
+            Response::Status {
+                current: alcohol.current,
+                target: alcohol.target,
+                update: alcohol.status.into(),
+                estimate: alcohol.estimate(),
+            }
+
         }
         Packet::SetDrink { value } => {
             state

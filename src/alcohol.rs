@@ -122,6 +122,12 @@ impl Alcohol {
         self.tick = 0;
     }
 
+    pub fn vomit(&mut self){
+        for i in i64::min(0,self.tick as i64-4) as usize ..(self.tick){
+            self.queue[i] = 0.;
+        }
+    }
+
     pub fn reset(&mut self) {
         self.status = AlcoholStatus::Uninitialized;
         self.target = 0.;
@@ -246,7 +252,23 @@ pub mod tests {
         alc.update_drink(38.5);
         for _ in 0..25 {
             alc.tick();
-            println!("{:?}",alc.estimate());
+        }
+    }
+
+    #[test]
+    fn test_vomit() {
+        let mut alc: Alcohol = Alcohol::default();
+        alc.update_target(0.002);
+        alc.update_drink(38.5);
+        for _ in 0..7 {
+            alc.tick();
+            println!("{:?}",alc.current);
+        }
+        alc.vomit();
+        println!("Vomited");
+        for _ in 0..14 {
+            alc.tick();
+            println!("{:?}",alc.current);
         }
     }
 }
