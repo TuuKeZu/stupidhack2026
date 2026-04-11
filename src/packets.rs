@@ -56,7 +56,12 @@ pub async fn handle_message(
         Packet::Ping { data: _ } => Response::Pong {
             data: "pong".to_string(),
         },
-        Packet::Reset => todo!(),
+        Packet::Reset => {
+            state.alcohol_update(|a| {
+                a.reset();
+            }).await;
+            Response::Okay
+        },
         Packet::SetTarget { value } => {
             state
                 .alcohol_update(|a| {
