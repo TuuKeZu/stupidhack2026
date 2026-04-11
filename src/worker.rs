@@ -13,7 +13,7 @@ pub async fn worker(state: SharedState) {
 
     sched
         .add(
-            Job::new_async("*/20 * * * * *", move |_uuid, _l| {
+            Job::new_async("*/10 * * * * *", move |_uuid, _l| {
                 let state = state_clone;
                 Box::pin(async move {
                     state
