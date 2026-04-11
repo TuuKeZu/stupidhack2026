@@ -153,13 +153,19 @@ struct View3: View {
                         await store.socket.send(data)
                     }
                 } catch {}
-                dismiss()
             }
-            Button("Disconnect", role: .destructive) {
+            Button("Vomit", role: .destructive) {
                 Task {
-                    store.socket.disconnect()
+                    do {
+                        let dict: [String: Any] = [
+                            "type": "vomit",
+                        ]
+                        let data = String(data: try JSONSerialization.data(withJSONObject: dict), encoding: .utf8)!
+                        Task {
+                            await store.socket.send(data)
+                        }
+                    } catch {}
                 }
-                dismiss()
             }
         }
         .padding()
