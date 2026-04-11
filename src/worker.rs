@@ -23,7 +23,22 @@ pub async fn worker(state: SharedState) {
                                     "[WORKER] AlcoholState is Uninitialized, sending status update"
                                 );
 
-                                let _ = alcohol.tick();
+                                match alcohol.tick() {
+                                    None => (),
+                                    Option::Some(amount) => {
+                                        let response = Response::PumpUpdate { amount };
+                                        tokio::spawn(async move {
+                                            if let Ok(json) = serde_json::to_string(&response) {
+                                                let _ = state
+                                                    .send_message(
+                                                        SocketType::Pump,
+                                                        Message::text(json),
+                                                    )
+                                                    .await;
+                                            }
+                                        });
+                                    }
+                                }
 
                                 let response = Response::Status {
                                     current: alcohol.current,
