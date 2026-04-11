@@ -34,9 +34,17 @@ pub enum Response {
         current: f64,
         target: f64,
         update: bool,
+        estimate: Estimate,
     },
     #[serde(rename = "pump")]
     PumpUpdate { amount: f64 },
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(tag = "estimate")]
+pub struct Estimate{
+    pub history: [f64;20],
+    pub future: [f64;20]
 }
 
 pub async fn handle_message(

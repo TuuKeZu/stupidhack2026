@@ -29,6 +29,7 @@ pub async fn worker(state: SharedState) {
                                     current: alcohol.current,
                                     target: alcohol.target,
                                     update: alcohol.status.into(),
+                                    estimate: alcohol.estimate(),
                                 };
 
                                 if let Ok(json) = serde_json::to_string(&response) {
@@ -60,6 +61,7 @@ pub async fn worker(state: SharedState) {
                                     current: alcohol.current,
                                     target: alcohol.target,
                                     update: alcohol.status.into(),
+                                    estimate: alcohol.estimate(),
                                 };
 
                                 match alcohol.tick() {

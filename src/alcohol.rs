@@ -1,5 +1,7 @@
 // config
 
+use crate::packets::Estimate;
+
 // assume one tick is 5min
 const TICKS_TO_HIT: usize = 4;
 
@@ -38,7 +40,7 @@ impl Into<bool> for AlcoholStatus {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct Alcohol {
     /// Estimate of the current BAC
     pub current: f64,
@@ -52,9 +54,10 @@ pub struct Alcohol {
     /// Amount of ethanol in the Liver
     pub liver: f64,
     pub queue: Vec<f64>,
+    pub history: Vec<f64>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Person {
     pub gender: Gender,
     /// Weight in KG
@@ -73,7 +76,7 @@ impl Default for Person {
     }
 }
 
-#[derive(Default, Debug)]
+#[derive(Default, Debug, Clone)]
 pub enum Gender {
     Male,
     Female,
@@ -136,12 +139,42 @@ impl Alcohol {
         }
     }
 
+    pub fn estimate(&self)-> Estimate{
+        Estimate{ history: self.get_history(), future: self.get_future() }
+    }
+
+    fn get_history(&self) -> [f64; 20]{
+        let end:usize = self.tick;
+        let start:usize = i64::max(self.tick as i64-20,0) as usize;
+        let start_index = 20 + start - end;
+        let mut res = [0.;20];
+        for i in 0..usize::min(20,end-start) {
+            res[i+start_index]=self.history[start+i];
+        }
+        res
+    }
+
+    fn get_future(&self) -> [f64;20]{
+        self.simulate()
+    }
+
+    fn simulate(&self) -> [f64;20]{
+        let mut res = [0.;20];
+        let mut new = self.clone();
+        for i in 0..20{
+            new.tick();
+            res[i] = new.current;
+        }
+        res
+    }
+
     ///Runs one tick and returns the amount of alcohol to be given
     pub fn tick(&mut self) -> Option<f64> {
         self.update_current();
         if self.tick > 24 {
             self.status = AlcoholStatus::Uninitialized;
         }
+        self.history.push(self.current);
 
         // "köyhän miehen PID
         if self.estimate_forward(TICKS_TO_HIT) < self.target {
@@ -196,5 +229,16 @@ pub mod tests {
             alc.tick();
         }
         assert!(f64::abs(alc.current-0.001)<=0.0002)
+    }
+
+    #[test]
+    fn test_estimate() {
+        let mut alc: Alcohol = Alcohol::default();
+        alc.update_target(0.001);
+        alc.update_drink(38.5);
+        for _ in 0..25 {
+            alc.tick();
+            println!("{:?}",alc.estimate());
+        }
     }
 }
